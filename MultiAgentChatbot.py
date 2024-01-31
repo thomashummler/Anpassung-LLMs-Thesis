@@ -7,7 +7,8 @@ import re
 import json
 from openai import OpenAI
 
-AAPI_KEY = os.environ["API_KEY"]
+#openai API Key aus Umgebungsvariable lesen
+API_KEY = os.environ["API_KEY"]
 openai_api_key = API_KEY
 
 #Pfad zu Database
@@ -164,22 +165,22 @@ if prompt := st.chat_input("What is up?"):
 
     user_input = prompt
     #User Input an Agent übergebend er JSON generiert
-    st.session_state.chatVerlauf_Information.append({"role": "user", "content": user_input})
-    chat_Filter = client.chat.completions.create(
-    model="gpt-4-1106-preview",
+    st.session_state.chatVerlauf_Information.append({"role": "user", "content": user_input}) # User Input in Chatverlauf hinzufügen bevor API Call über Agent gemacht wird
+    chat_Filter = client.chat.completions.create(    #API Call für Agent machen der über NLP die Eingaben des Users interpretiert und den vordefinierten Variabeln zuweist und diese als JSON zurückliefert
+    model="gpt-4-1106-preview", 
     response_format={ "type": "json_object" },
     messages= st.session_state.chatVerlauf_Information
     )
     jsondata =  chat_Filter.choices[0].message.content #JSON zwischenspeichern
-    st.session_state.chatVerlauf_Information.append({"role": "assistant", "content": jsondata})
+    st.session_state.chatVerlauf_Information.append({"role": "assistant", "content": jsondata})           #JSON Datei in Chatverlauf für Agent der JSON Generierung hinzufügen
     print(jsondata)
-    filtered_DF = setDataAndFilterWithJSON(jsondata) #Dataframe nach JSON Informationen filtern
+    filtered_DF = setDataAndFilterWithJSON(jsondata) #Dataframe nach JSON Informationen filtern und in filtered_DF zwischenspeichern
     print(filtered_DF)
     #print(filtered_DF)
-    lengthOfFilteredDatabase = filtered_DF.shape[0]
+    lengthOfFilteredDatabase = filtered_DF.shape[0] #Länge des Dataframes und somit die Anzahl der Schuhe zwischenspeichern
     #print(lengthOfFilteredDatabase)
 
-    # Falls zweiter Agent noch nicht lief diesen initieren und an diesen JSON, das gefilterte Dataframe und die Länge des Dataframes weitergeben
+    # Falls zweiter Agent noch nicht lief, diesen initieren und an diesen JSON, das gefilterte Dataframe und die Länge des Dataframes weitergeben
     if 'chatVerlauf_UserInteraction' not in st.session_state:
         st.session_state.chatVerlauf_UserInteraction = []
         st.session_state.chatVerlauf_UserInteraction.append({
@@ -206,7 +207,7 @@ if prompt := st.chat_input("What is up?"):
     system_Message = chat_User.choices[0].message.content
     st.session_state.chatVerlauf_UserInteraction.append({"role": "assistant", "content": system_Message}) # Antwort des Agent in Historie des Agent speichern
     full_response = system_Message
-    message_placeholder.markdown(full_response) # Antwort im Chat anzeigen lassen
+    message_placeholder.markdown(full_response) 
     # Add assistant response to chat history
     st.session_state.messages.append({"role": "assistant", "content": full_response})# Antwort im Chat anzeigen lassen
     print(st.session_state.chatVerlauf_UserInteraction)
