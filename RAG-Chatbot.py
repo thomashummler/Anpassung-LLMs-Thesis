@@ -105,6 +105,7 @@ client = OpenAI(
 
 st.title("Chatbot")
 
+#Agent für Begrüßungsnachricht
 chatVerlauf_UserInteraction=[{
         "role": "system",
            "content": f"You are a polite and helpful assistant who should help the user find the right shoes out of a Shoes Database.That's why you greet the user first and ask how you can help them. All your Messages should be in German. "
@@ -152,7 +153,8 @@ if prompt := st.chat_input("Hallo, wie kann ich dir weiterhelfen?"):
             "ReRanker": {"top_k": 5},                # comment for debug
         }
     )
-    documents = prediction['documents']
+    
+    documents = prediction['documents'] #Erhaltene Dokumente Zwischenspeichern
 
 
     #Prompt Engineering und Übergabe der erhaltenenen Dokumente an Prompt
@@ -171,13 +173,13 @@ if prompt := st.chat_input("Hallo, wie kann ich dir weiterhelfen?"):
                       f"Do not assume a specific gender when its not given in the Text"
          }) 
         
-    st.session_state.chatVerlauf_UserInteraction.append({"role": "user", "content": user_input})
-    chat_User = client.chat.completions.create(
+    st.session_state.chatVerlauf_UserInteraction.append({"role": "user", "content": user_input}) #User Input in Chatverlauf des Agent hinzufügen
+    chat_User = client.chat.completions.create( #Antwort des Agents generieren
     model="gpt-4-1106-preview",
     messages=st.session_state.chatVerlauf_UserInteraction
     )
     antwort_Message = chat_User.choices[0].message.content
-    st.session_state.chatVerlauf_UserInteraction.append({"role": "assistant", "content": antwort_Message})
+    st.session_state.chatVerlauf_UserInteraction.append({"role": "assistant", "content": antwort_Message}) #Antwort dem Chatverlauf hinzufügen
     with st.chat_message("assistant"):
         message_placeholder.markdown(antwort_Message)
     print( st.session_state.chatVerlauf_UserInteraction)
